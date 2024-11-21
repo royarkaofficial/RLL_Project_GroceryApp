@@ -1,0 +1,369 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="GroceryApp.SiteMaster" %>
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%: Page.Title %> - My ASP.NET Application</title>
+    <link href="Content/style.css" rel="stylesheet" />
+    <script src="Scripts/jquery-3.4.1.js"></script>
+    <script src="Scripts/enums.js"></script>
+    <script src="Scripts/xhr.js"></script>
+    <script src="Scripts/util.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.7/umd/popper.min.js" integrity="sha512-uaZ0UXmB7NHxAxQawA8Ow2wWjdsedpRu7nJRSoI2mjnwtY8V5YiCWavoIpo1AhWPMLiW5iEeavmA3JJ2+1idUg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <asp:PlaceHolder runat="server">
+        <%: Scripts.Render("~/bundles/modernizr") %>
+    </asp:PlaceHolder>
+
+    <webopt:bundlereference runat="server" path="~/Content/css" />
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+
+</head>
+<body class="set-bg">
+    <form class="needs-validation" runat="server">
+        <nav class="navbar navbar-expand-lg navbar-light bg-primary">
+            <div class="container-fluid mx-5">
+                <a class="navbar-brand text-white" href="Welcome"><b>Grocery App</b></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li id="cart-menu" class="nav-item">
+                            <i class="fa fa-shopping-cart">
+                                <span id="cart-badge" class="position-absolute start-100 translate-middle badge rounded-circle bg-danger"></span>
+                            </i>
+                            <a class="nav-link text-white" href="Cart">Cart</a>
+                        </li>
+                        <li id="order-menu" class="nav-item">
+                            <a class="nav-link text-white" href="Order">Orders</a>
+                        </li>
+                        <li id="order-menu" class="nav-item">
+                            <a class="nav-link text-white" href="ProductDetails">Add Product</a>
+                        </li>
+                        <li id="order-menu" class="nav-item">
+                            <a class="nav-link text-white" href="OrderHistory">Order History</a>
+                        </li>
+                        <li class="nav-item dropdown me-2" onclick="window.location.href = 'Profile'">
+                            <img id="profile-img" src="./Assets/male.png"  />
+                            <a class="nav-link dropdown-toggle text-white" id="user-dropdown" href="Profile" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="user-dropdown">
+                                <li><a class="dropdown-item" href="Orders">My Orders</a></li>
+                                <li><a class="dropdown-item" href="Cart">My Cart</a></li>
+                                <li><a class="dropdown-item" href="Profile">Profile</a></li>
+                                <div onclick="logOut()">
+                                    <li><a id="log-out" class="dropdown-item">Log Out</a></li>
+                                </div>
+                            </ul>
+                        </li>
+                        <li id="logout-menu" class="nav-item" onclick="logOut()">
+                            <a class="nav-link text-white" href="#">Log Out</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div id="page-content" class="container body-content">
+            <asp:ContentPlaceHolder ID="MainContent" runat="server">
+            </asp:ContentPlaceHolder>
+        </div>
+
+        <div class="toast text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Something went wrong. Please try again.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Confirm?</h1>
+                <button type="button" class="btn-close" aria-label="Close" onclick="modal.hide()"></button>
+              </div>
+              <div class="modal-body">
+                Are you confirm that you want to delete this product. This cannot be undone.
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary form-btn" onclick="modal.hide()">Cancel</button>
+                <button type="button" class="btn btn-primary form-btn" onclick="onDelete(null, true)">
+                    Delete
+                    <span class="spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <asp:ScriptManager runat="server">
+            <Scripts>
+                <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
+                <%--Framework Scripts--%>
+                <asp:ScriptReference Name="MsAjaxBundle" />
+                <asp:ScriptReference Name="jquery" />
+                <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
+                <asp:ScriptReference Name="WebUIValidation.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebUIValidation.js" />
+                <asp:ScriptReference Name="MenuStandards.js" Assembly="System.Web" Path="~/Scripts/WebForms/MenuStandards.js" />
+                <asp:ScriptReference Name="GridView.js" Assembly="System.Web" Path="~/Scripts/WebForms/GridView.js" />
+                <asp:ScriptReference Name="DetailsView.js" Assembly="System.Web" Path="~/Scripts/WebForms/DetailsView.js" />
+                <asp:ScriptReference Name="TreeView.js" Assembly="System.Web" Path="~/Scripts/WebForms/TreeView.js" />
+                <asp:ScriptReference Name="WebParts.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebParts.js" />
+                <asp:ScriptReference Name="Focus.js" Assembly="System.Web" Path="~/Scripts/WebForms/Focus.js" />
+                <asp:ScriptReference Name="WebFormsBundle" />
+                <%--Site Scripts--%>
+            </Scripts>
+        </asp:ScriptManager>
+    </form>
+    <asp:PlaceHolder runat="server">
+        <%: Scripts.Render("~/Scripts/bootstrap.js") %>
+    </asp:PlaceHolder>
+</body>
+</html>
+
+<style>
+#page-content {
+    margin-right: 60px;
+    margin-left: 60px;
+    max-width: calc(100vw - 114px);
+}
+
+nav.navbar {
+    height: 60px;
+}
+
+.navbar-brand {
+    margin-top: -5px;
+}
+
+.nav-item.dropdown,
+#cart-menu {
+    position: absolute;
+    top: 8px;
+}
+
+#cart-menu {
+    right: 52px;
+}
+
+.nav-item.dropdown {
+    right: 130px;
+}
+
+#cart-menu a {
+    display: inline-block;
+    margin-left: -5px;
+}
+
+#cart-menu i {
+    color: #ffffff;
+    font-size: 18px;
+}
+
+ul.navbar-nav {
+    margin-right: 0px;
+}
+
+#profile-img {
+    border-radius: 50%;
+    height: 35px;
+    width: 35px;
+}
+
+#user-dropdown {
+    display: inline-block;
+}
+
+#log-out:hover {
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    font-weight: bold;
+}
+
+#cart-badge {
+    margin-left: 6px;
+    font-size: 12px;
+    font-family: sans-serif;
+}
+</style>
+
+<script>
+    let currentUser;
+    let cartId;
+    let products = [];
+    let productsUnderCart = [];
+    let totalPrice = 0;
+    let latestProductIdToBeRemovedFromCart;
+
+    window.onload = function onLoad() {
+        validateSession();
+        const endpoint = `users/${userId}`;
+        const onOk = function (response) {
+            currentUser = response.data;
+            $("#user-dropdown")[0].innerText = `${currentUser.firstName} ${currentUser.lastName}`;
+            setPagewiseData();
+        };
+        const onError = function (response) { };
+        send(HttpMethod.GET, endpoint, null, onOk, onError);
+    }
+
+    function setPagewiseData() {
+        let callbacks = [];
+        const queryParameters = new URLSearchParams(window.location.search);
+        switch (window.location.pathname.toUpperCase()) {
+            case "/PROFILE":
+                setProfile(currentUser);
+                break;
+            case "/WELCOME":
+                const isOrderPlaced = localStorage.getItem("order_placed_successfully");
+                if (isOrderPlaced) {
+                    localStorage.removeItem("order_placed_successfully");
+                    $(".toast")[0].classList.remove("bg-danger");
+                    $(".toast")[0].classList.add("show", "bg-success");
+                    $(".toast-body")[0].innerText = 'Order placed successfully';
+                }
+                callbacks.push(setProducts);
+                break;
+            case "/PRODUCTDETAILS":
+                if (queryParameters.size == 2 && queryParameters.has("productId") && queryParameters.has("mode")) {
+                    $("#form-header")[0].innerText = "Edit Product Details";
+                    $(".form-btn")[0].innerText = "Save Changes";
+                    const productId = parseInt(queryParameters.get("productId"));
+                    setProduct(productId);
+                }
+                break;
+            case "/ORDERHISTORY":
+                setOrderHistory();
+                break;
+            case "/ORDERHISTORYDETAILS":
+                callbacks.push(setOrderHistoryDetails);
+                break;
+            case "/CART":
+                callbacks.push(isCartEmpty);
+                break;
+        }
+        fetchCartDetails(callbacks);
+    }
+
+    function fetchCartDetails(callbacks) {
+        const endpoint = `users/${userId}/carts`;
+        const onOk = function (response) {
+            if (response.data) {
+                cartId = response.data.cartId;
+                productsUnderCart = response.data.productIds;
+                updateCartBadge();
+            }
+            else {
+                cartId = null;
+                productsUnderCart = [];
+            }
+            if (callbacks && callbacks.length > 0) {
+                callbacks.forEach(callback => callback());
+            }
+        };
+        const onError = function () { };
+        send(HttpMethod.GET, endpoint, null, onOk, onError);
+    }
+
+    function updateCartBadge() {
+        const cartBadge = $("#cart-badge")[0];
+        if (productsUnderCart.length > 0) {
+            cartBadge.style.display = "inline-block";
+        }
+        else {
+            cartBadge.style.display = "none";
+        }
+        cartBadge.innerText = productsUnderCart.length;
+    }
+
+    function modifyCart({ id, price }) {
+        const button = $(`#cart-btn-${id}`)[0];
+        const isAlreadyAddedToTheCart = productsUnderCart.findIndex(x => x == id) > -1;
+        let mode;
+        if (isAlreadyAddedToTheCart) {
+            productsUnderCart = productsUnderCart.filter(x => x != id);
+            latestProductIdToBeRemovedFromCart = id;
+            if (button) {
+                button.classList.add('btn-outline-primary');
+                button.classList.remove('btn-outline-danger');
+                button.innerText = "Add to Cart";
+            }
+            else {
+                showPaymentDetails();
+            }
+            mode = CartMode.DELETE;
+            totalPrice += price;
+        }
+        else {
+            productsUnderCart.push(id);
+            button.classList.add('btn-outline-danger');
+            button.classList.remove('btn-outline-primary');
+            button.innerText = "Remove";
+            mode = CartMode.ADD;
+            totalPrice -= price;
+        }
+        updateCartBadge();
+        const data = {
+            productId: id,
+            operationType: mode
+        }
+        if (cartId) {
+            const endpoint = `users/${userId}/carts/${cartId}`;
+            const onOk = function (response) {
+                $(".toast")[0].classList.remove("bg-danger");
+                $(".toast")[0].classList.add("show", "bg-success");
+                $(".toast-body")[0].innerText = `Product ${mode == CartMode.ADD ? 'added to' : 'removed from'} the cart.`;
+                if (productsUnderCart.length == 0) {
+                    cartId = null;
+                }
+                if (mode == CartMode.DELETE) {
+                    const el = $(`#product-under-cart-${latestProductIdToBeRemovedFromCart}`);
+                    if (el && el.length > 0 && el[0]) {
+                        el[0].remove();
+                        if (productsUnderCart.length == 0) {
+                            isCartEmpty();
+                        }
+                    }
+                }
+            };
+            const onError = function () {
+                $(".toast")[0].classList.add('show');
+                $(".toast-body")[0].innerText = `Something went wrong.`;
+            };
+            send(HttpMethod.PUT, endpoint, data, onOk, onError);
+        }
+        else {
+            const endpoint = `users/${userId}/carts`;
+            const onOk = function (response) {
+                $(".toast")[0].classList.remove("bg-danger");
+                $(".toast")[0].classList.add("show", "bg-success");
+                $(".toast-body")[0].innerText = `Product ${mode == CartMode.ADD ? 'added to' : 'removed from'} the cart.`;
+                cartId = response.data.id;
+            };
+            const onError = function () {
+                $(".toast")[0].classList.add('show');
+                $(".toast-body")[0].innerText = `Something went wrong.`;
+            };
+            send(HttpMethod.POST, endpoint, data, onOk, onError);
+        }
+    }
+
+    function logOut() {
+        localStorage.removeItem("grocery_app_user_id");
+        localStorage.removeItem("grocery_app_access_token");
+        window.location.href = "Login";
+    }
+</script>

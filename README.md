@@ -1,0 +1,1 @@
+We developed ToZepy Grocery, a customer-friendly ASP.NET app for managing shopping experiences. It features a shopping cart, stock display, order placement, and item management, using Dapper for database connectivity. Built in Visual Studio, the app is available on GitHub.
